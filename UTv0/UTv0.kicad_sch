@@ -1,0 +1,155 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "bd24c4db-4e36-4117-bd4f-5228ef241da9")
+	(paper "B")
+	(title_block
+		(title "Ultrasound")
+		(rev "0.1")
+		(company "Ege Turan")
+		(comment 2 "Stanford, CA 94305")
+		(comment 3 "Electrical Engineering Department")
+		(comment 4 "Stanford University")
+	)
+	(lib_symbols)
+	(sheet
+		(at 133.35 123.19)
+		(size 184.15 45.72)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 141 204 255 1.0000)
+		)
+		(uuid "1c4481c7-b117-41e4-9edc-8c9b52f2e629")
+		(property "Sheetname" "Receive"
+			(at 133.35 122.4784 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "rx.kicad_sch"
+			(at 133.35 169.4946 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "UT"
+				(path "/bd24c4db-4e36-4117-bd4f-5228ef241da9"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 133.35 53.34)
+		(size 184.15 49.53)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 255 112 112 1.0000)
+		)
+		(uuid "347c3b27-5569-44f0-9bfc-0cdf1d200bc1")
+		(property "Sheetname" "Transmit"
+			(at 133.35 52.6284 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "tx.kicad_sch"
+			(at 133.35 103.4546 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "UT"
+				(path "/bd24c4db-4e36-4117-bd4f-5228ef241da9"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 76.2 87.63)
+		(size 48.26 50.8)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 215 163 255 1.0000)
+		)
+		(uuid "7e464b7c-fefd-453a-875a-b2ebab01e306")
+		(property "Sheetname" "MCU"
+			(at 76.2 86.9184 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu.kicad_sch"
+			(at 76.2 139.0146 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "Trig" output
+			(at 124.46 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "37694029-56c1-48c7-b731-6983f9387323")
+		)
+		(pin "AnalogRx" output
+			(at 124.46 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "2a94eecf-51ac-4ebb-9b23-711a96f84c1f")
+		)
+		(instances
+			(project "UT"
+				(path "/bd24c4db-4e36-4117-bd4f-5228ef241da9"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)
