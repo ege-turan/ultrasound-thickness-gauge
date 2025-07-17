@@ -13,6 +13,26 @@
 		(comment 4 "Stanford University")
 	)
 	(lib_symbols)
+	(wire
+		(pts
+			(xy 124.46 132.08) (xy 133.35 132.08)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11140633-6dfa-4ae8-81c1-83fcc5034939")
+	)
+	(wire
+		(pts
+			(xy 124.46 93.98) (xy 133.35 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7b368d13-3789-4944-9db9-fb70cf9205cb")
+	)
 	(sheet
 		(at 133.35 123.19)
 		(size 184.15 45.72)
@@ -42,6 +62,16 @@
 				)
 				(justify left top)
 			)
+		)
+		(pin "AnalogRx" output
+			(at 133.35 132.08 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "e3478e34-0c7c-44d8-9112-0a894fabce63")
 		)
 		(instances
 			(project "UTv0"
@@ -80,6 +110,16 @@
 				)
 				(justify left top)
 			)
+		)
+		(pin "Trig" input
+			(at 133.35 93.98 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "065bd710-062e-4db1-b48a-5faadfb1cea4")
 		)
 		(instances
 			(project "UTv0"
