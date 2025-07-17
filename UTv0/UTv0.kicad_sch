@@ -44,7 +44,7 @@
 			)
 		)
 		(instances
-			(project "UT"
+			(project "UTv0"
 				(path "/bd24c4db-4e36-4117-bd4f-5228ef241da9"
 					(page "4")
 				)
@@ -82,7 +82,7 @@
 			)
 		)
 		(instances
-			(project "UT"
+			(project "UTv0"
 				(path "/bd24c4db-4e36-4117-bd4f-5228ef241da9"
 					(page "3")
 				)
@@ -140,7 +140,7 @@
 			(uuid "2a94eecf-51ac-4ebb-9b23-711a96f84c1f")
 		)
 		(instances
-			(project "UT"
+			(project "UTv0"
 				(path "/bd24c4db-4e36-4117-bd4f-5228ef241da9"
 					(page "2")
 				)
