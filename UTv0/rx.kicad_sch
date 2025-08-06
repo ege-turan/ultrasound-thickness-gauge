@@ -2674,7 +2674,7 @@
 		(uuid 21a66e5e-928f-49b4-b623-5652f31a1bed)
 	)
 	(rectangle
-		(start 181.61 40.64)
+		(start 176.53 40.64)
 		(end 257.81 133.35)
 		(stroke
 			(width 0)
@@ -2684,6 +2684,16 @@
 			(type none)
 		)
 		(uuid 8d6967cf-1390-4045-97e7-bcd45a3832ec)
+	)
+	(text "Set\nDC Bias\n(R divide)"
+		(exclude_from_sim no)
+		(at 196.088 68.072 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "0b9ea19e-0843-4634-8f4b-adc78d0324af")
 	)
 	(text "3 op-amp stages"
 		(exclude_from_sim no)
@@ -2695,9 +2705,19 @@
 		)
 		(uuid "22825820-cb70-4b47-9244-6d94afe214fd")
 	)
+	(text "zener-diode should protect\nthe port from >3.3V because\nthe arduino due can only read\nvoltages up to 3.3V"
+		(exclude_from_sim no)
+		(at 290.068 100.584 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "5da23619-5ade-4280-8ea0-d9635463ca00")
+	)
 	(text "peak detection (+ rectifier)"
 		(exclude_from_sim no)
-		(at 195.072 38.608 0)
+		(at 190.246 38.608 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2705,9 +2725,9 @@
 		)
 		(uuid "6eb7e78e-6b2f-4df0-820a-51db8e14032d")
 	)
-	(text "?"
+	(text "Isolate\nDC bias"
 		(exclude_from_sim no)
-		(at 177.8 101.854 0)
+		(at 171.45 68.58 0)
 		(effects
 			(font
 				(size 1.27 1.27)

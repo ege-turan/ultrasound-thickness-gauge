@@ -1,6 +1,6 @@
-#define pin_output 5
-#define pin_input_magnification 4
-#define pin_input_sleep 3
+#define pin_output 51
+#define pin_input_magnification 41
+#define pin_input_sleep 31
 
 unsigned long start_time;
 unsigned long stop_time;
@@ -32,8 +32,8 @@ void setup()
     ADC -> ADC_CHER = 0x03;               // enable ADC on pin A7
     
     pinMode(pin_output, OUTPUT);
-    pinMode(pin_input_magnification, INPUT);    // Switch-input for magnification
-    pinMode(pin_input_sleep, INPUT);            // Switch-input for sleep-mode
+    pinMode(pin_input_magnification, INPUT_PULLUP);    // Switch-input for magnification
+    pinMode(pin_input_sleep, INPUT_PULLUP);            // Switch-input for sleep-mode
    
     digitalWrite(pin_output, LOW); 
  
@@ -48,7 +48,7 @@ void setup()
     myGLCD.fillRect(0, 0, 432, 13);
     myGLCD.setColor(0, 0, 0);
     myGLCD.setBackColor(255, 255, 0);
-    myGLCD.print("Sonographie - stoppi", CENTER, 1);
+    myGLCD.print("Ultrasound - Ege", CENTER, 1);
    }
 
 
