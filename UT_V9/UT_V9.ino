@@ -7,6 +7,8 @@ MCUFRIEND_kbv tft;
 #define BLACK   0x0000
 #define WHITE   0xFFFF
 #define YELLOW  0xFFE0
+#define RED     0xF800
+#define GREEN   0x07E0
 
 // ----------------- Pins -----------------
 #define pin_output 51
@@ -16,7 +18,7 @@ MCUFRIEND_kbv tft;
 // ----------------- Constants for Thickness Calculation -----------------
 #define SPEED_OF_SOUND_MM_PER_US 6.224    // 6061 Aluminum speed of sound in mm/us
 #define ECHO_THRESHOLD 2000              // ADC threshold to detect echo
-#define SAMPLE_PERIOD_US 0.2               // Approximate ADC sample period in microseconds
+#define SAMPLE_PERIOD_US 0.2              // Approximate ADC sample period in microseconds
 
 // ----------------- Globals -----------------
 unsigned int values[600];
@@ -24,11 +26,9 @@ int Trigger_time;
 int i, j;
 
 void setup() {
-  Serial.begin(115200);
-
   // ADC config for Due
   REG_ADC_MR = 0x10380080;  // freerun, prescaler
-  ADC->ADC_CHER = 0x03;     // enable ADC on channels 0 and 1 (confirm your channel here!)
+  ADC->ADC_CHER = 0x03;     // enable ADC on channels 0 and 1
 
   pinMode(pin_output, OUTPUT);
   pinMode(pin_input_magnification, INPUT);
@@ -46,9 +46,7 @@ void setup() {
   tft.fillRect(0, 0, 432, 13, YELLOW);
   tft.setCursor(120, 1);
   tft.setTextSize(1);
-  tft.print("UT - DEBUG");
-
-  Serial.println("System Ready.");
+  tft.print("UT - DISPLAY MODE");
 }
 
 void loop() {
@@ -64,15 +62,6 @@ void loop() {
       values[i] = ADC->ADC_CDR[0];
     }
 
-    // --- Print ADC values to Serial Monitor for debugging ---
-    Serial.print("Scan ");
-    Serial.print(j);
-    Serial.println(" ADC values:");
-    for (i = 0; i < numSamples; i++) {
-      Serial.println(values[i]);
-    }
-    Serial.println("-----");
-
     // Find echo index based on threshold
     int echoIndex = -1;
     for (i = 0; i < numSamples; i++) {
@@ -82,29 +71,24 @@ void loop() {
       }
     }
 
-    // Calculate and print thickness if echo detected
+    // Display scan info on TFT
+    tft.setTextColor(WHITE, BLACK);
+    tft.setTextSize(1);
+    tft.fillRect(0, 320, 480, 20, BLACK); // clear old text
+
     if (echoIndex >= 0) {
       unsigned long echoTime = echoIndex * SAMPLE_PERIOD_US;
       float thickness_mm = (echoTime * SPEED_OF_SOUND_MM_PER_US) / 2.0;
 
-      Serial.print("Scan ");
-      Serial.print(j);
-      Serial.print(": Echo at sample ");
-      Serial.print(echoIndex);
-      Serial.print(", time = ");
-      Serial.print(echoTime);
-      Serial.print(" us, thickness = ");
-      Serial.print(thickness_mm, 2);
-      Serial.println(" mm");
+      tft.setCursor(5, 322);
+      tft.printf("Scan %d: Echo=%d  Time=%.2fus  Thick=%.2fmm",
+                 j, echoIndex, (float)echoTime, thickness_mm);
     } else {
-      Serial.print("Scan ");
-      Serial.print(j);
-      Serial.println(": No echo detected.");
+      tft.setCursor(5, 322);
+      tft.printf("Scan %d: No echo detected.", j);
     }
 
     // Draw timing scale (right side)
-    tft.setTextColor(WHITE, BLACK);
-    tft.setTextSize(1);
     tft.drawLine(440, 15, 440, 15 + 300, WHITE);
     for (int y = 15, t = 0; y <= 315; y += 50, t += 20) {
       tft.drawLine(440, y, 445, y, WHITE);
@@ -135,6 +119,6 @@ void loop() {
       }
     }
 
-    delay(1000);
+    delay(2000);
   }
 }

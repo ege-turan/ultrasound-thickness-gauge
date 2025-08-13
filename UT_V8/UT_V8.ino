@@ -14,9 +14,10 @@ MCUFRIEND_kbv tft;
 #define pin_input_sleep 31
 
 // ----------------- Constants for Thickness Calculation -----------------
-#define SPEED_OF_SOUND_MM_PER_US 6.224    // 6061 Aluminum speed of sound in mm/us
-#define ECHO_THRESHOLD 2000              // ADC threshold to detect echo
-#define SAMPLE_PERIOD_US 0.2               // Approximate ADC sample period in microseconds
+#define SPEED_OF_SOUND_MM_PER_US 6.224    // 6061 Aluminum
+#define CONSTANT_DELAY_US 6.93            // System delay to subtract
+#define ECHO_THRESHOLD 4000               // ADC threshold to detect echo
+#define SAMPLE_PERIOD_US 0.2              // ADC sample period in microseconds
 
 // ----------------- Globals -----------------
 unsigned int values[600];
@@ -28,7 +29,7 @@ void setup() {
 
   // ADC config for Due
   REG_ADC_MR = 0x10380080;  // freerun, prescaler
-  ADC->ADC_CHER = 0x03;     // enable ADC on channels 0 and 1 (confirm your channel here!)
+  ADC->ADC_CHER = 0x03;     // enable ADC on channels 0 and 1
 
   pinMode(pin_output, OUTPUT);
   pinMode(pin_input_magnification, INPUT);
@@ -46,7 +47,7 @@ void setup() {
   tft.fillRect(0, 0, 432, 13, YELLOW);
   tft.setCursor(120, 1);
   tft.setTextSize(1);
-  tft.print("UT - DEBUG");
+  tft.print("UT - Ege V8");
 
   Serial.println("System Ready.");
 }
@@ -57,35 +58,41 @@ void loop() {
     digitalWrite(pin_output, HIGH);
     digitalWrite(pin_output, LOW);
 
-    // Sample data based on magnification
+    // Sample data
     int numSamples = (digitalRead(pin_input_magnification) == LOW) ? 300 : 600;
     for (i = 0; i < numSamples; i++) {
       while ((ADC->ADC_ISR & 0x03) == 0);
       values[i] = ADC->ADC_CDR[0];
     }
 
-    // --- Print ADC values to Serial Monitor for debugging ---
+    // --- Serial Plotter-friendly output ---
     Serial.print("Scan ");
     Serial.print(j);
     Serial.println(" ADC values:");
     for (i = 0; i < numSamples; i++) {
+      Serial.print(i);       // sample number
+      Serial.print(" ");
       Serial.println(values[i]);
     }
     Serial.println("-----");
 
-    // Find echo index based on threshold
+    // Find echo index by threshold starting only after constant delay samples
     int echoIndex = -1;
-    for (i = 0; i < numSamples; i++) {
+    int minSearchIndex = 10;
+
+    for (i = minSearchIndex; i < numSamples; i++) {
       if (values[i] > ECHO_THRESHOLD) {
         echoIndex = i;
         break;
       }
     }
 
-    // Calculate and print thickness if echo detected
     if (echoIndex >= 0) {
       unsigned long echoTime = echoIndex * SAMPLE_PERIOD_US;
-      float thickness_mm = (echoTime * SPEED_OF_SOUND_MM_PER_US) / 2.0;
+      float correctedTime = echoTime - CONSTANT_DELAY_US;
+      if (correctedTime < 0) correctedTime = 0;
+
+      float thickness_mm = (correctedTime * SPEED_OF_SOUND_MM_PER_US) / 2.0;
 
       Serial.print("Scan ");
       Serial.print(j);
@@ -93,16 +100,33 @@ void loop() {
       Serial.print(echoIndex);
       Serial.print(", time = ");
       Serial.print(echoTime);
+      Serial.print(" us, corrected = ");
+      Serial.print(correctedTime);
       Serial.print(" us, thickness = ");
       Serial.print(thickness_mm, 2);
       Serial.println(" mm");
+
+      // Display thickness higher so it's not cut off
+      tft.fillRect(0, 295, 432, 24, YELLOW);
+      tft.setTextColor(BLACK, YELLOW);
+      tft.setTextSize(2);
+      tft.setCursor(10, 297);
+      tft.print("Thickness: ");
+      tft.print(thickness_mm, 2);
+      tft.print(" mm");
     } else {
       Serial.print("Scan ");
       Serial.print(j);
       Serial.println(": No echo detected.");
+
+      tft.fillRect(0, 295, 432, 24, YELLOW);
+      tft.setTextColor(BLACK, YELLOW);
+      tft.setTextSize(2);
+      tft.setCursor(10, 297);
+      tft.print("No Echo");
     }
 
-    // Draw timing scale (right side)
+    // Draw timing scale
     tft.setTextColor(WHITE, BLACK);
     tft.setTextSize(1);
     tft.drawLine(440, 15, 440, 15 + 300, WHITE);
@@ -113,14 +137,14 @@ void loop() {
       tft.print(" us");
     }
 
-    // Draw scan column grayscale
-    if (digitalRead(pin_input_magnification) == LOW) { // normal mode
+    // Draw scan grayscale
+    if (digitalRead(pin_input_magnification) == LOW) {
       for (i = 0; i < 300; i++) {
         uint8_t gray = map(values[i], 0, 4095, 0, 255);
         uint16_t color = tft.color565(gray, gray, gray);
         tft.fillRect(j * 24, 15 + i, 23, 1, color);
       }
-    } else { // magnified mode
+    } else {
       for (i = 0; i < 300; i++) {
         uint8_t gray = map(values[2 * i], 0, 4095, 0, 255);
         uint16_t color = tft.color565(gray, gray, gray);
@@ -130,9 +154,7 @@ void loop() {
 
     // Sleep mode check
     if (digitalRead(pin_input_sleep) == HIGH) {
-      while (digitalRead(pin_input_sleep) == HIGH) {
-        // paused
-      }
+      while (digitalRead(pin_input_sleep) == HIGH) {}
     }
 
     delay(1000);

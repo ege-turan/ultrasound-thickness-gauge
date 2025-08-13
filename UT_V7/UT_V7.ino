@@ -15,7 +15,8 @@ MCUFRIEND_kbv tft;
 
 // ----------------- Constants for Thickness Calculation -----------------
 #define SPEED_OF_SOUND_MM_PER_US 6.224    // 6061 Aluminum speed of sound in mm/us
-#define ECHO_THRESHOLD 2000              // ADC threshold to detect echo
+#define CONSTANT_DELAY_US 6.93           // System delay to subtract from echo time
+#define ECHO_DELTA_THRESHOLD 300         // Delta threshold above min ADC value
 #define SAMPLE_PERIOD_US 0.2               // Approximate ADC sample period in microseconds
 
 // ----------------- Globals -----------------
@@ -28,7 +29,7 @@ void setup() {
 
   // ADC config for Due
   REG_ADC_MR = 0x10380080;  // freerun, prescaler
-  ADC->ADC_CHER = 0x03;     // enable ADC on channels 0 and 1 (confirm your channel here!)
+  ADC->ADC_CHER = 0x03;     // enable ADC on channels 0 and 1 (adjust if needed)
 
   pinMode(pin_output, OUTPUT);
   pinMode(pin_input_magnification, INPUT);
@@ -46,7 +47,7 @@ void setup() {
   tft.fillRect(0, 0, 432, 13, YELLOW);
   tft.setCursor(120, 1);
   tft.setTextSize(1);
-  tft.print("UT - DEBUG");
+  tft.print("UT - Ege 7");
 
   Serial.println("System Ready.");
 }
@@ -73,10 +74,20 @@ void loop() {
     }
     Serial.println("-----");
 
-    // Find echo index based on threshold
-    int echoIndex = -1;
+    // Find minimum ADC value and its index
+    int minValue = 4096;
+    int minIndex = 0;
     for (i = 0; i < numSamples; i++) {
-      if (values[i] > ECHO_THRESHOLD) {
+      if (values[i] < minValue) {
+        minValue = values[i];
+        minIndex = i;
+      }
+    }
+
+    // Detect echo after minimum index
+    int echoIndex = -1;
+    for (i = minIndex; i < numSamples; i++) {
+      if (values[i] > minValue + ECHO_DELTA_THRESHOLD) {
         echoIndex = i;
         break;
       }
@@ -85,7 +96,13 @@ void loop() {
     // Calculate and print thickness if echo detected
     if (echoIndex >= 0) {
       unsigned long echoTime = echoIndex * SAMPLE_PERIOD_US;
-      float thickness_mm = (echoTime * SPEED_OF_SOUND_MM_PER_US) / 2.0;
+
+      // Apply constant delay correction
+      float correctedTime = echoTime - CONSTANT_DELAY_US;
+      if (correctedTime < 0) correctedTime = 0;  // prevent negative time
+
+      // Calculate thickness
+      float thickness_mm = (correctedTime * SPEED_OF_SOUND_MM_PER_US) / 2.0;
 
       Serial.print("Scan ");
       Serial.print(j);
@@ -93,13 +110,31 @@ void loop() {
       Serial.print(echoIndex);
       Serial.print(", time = ");
       Serial.print(echoTime);
+      Serial.print(" us, corrected = ");
+      Serial.print(correctedTime);
       Serial.print(" us, thickness = ");
       Serial.print(thickness_mm, 2);
       Serial.println(" mm");
+
+      // Display thickness higher so it's not cut off
+      tft.fillRect(0, 295, 432, 24, YELLOW); // moved up, bigger height
+      tft.setTextColor(BLACK, YELLOW);
+      tft.setTextSize(2);
+      tft.setCursor(10, 297);
+      tft.print("Thickness: ");
+      tft.print(thickness_mm, 2);
+      tft.print(" mm");
     } else {
       Serial.print("Scan ");
       Serial.print(j);
       Serial.println(": No echo detected.");
+
+      // Display no echo message
+      tft.fillRect(0, 295, 432, 24, YELLOW); // moved up, bigger height
+      tft.setTextColor(BLACK, YELLOW);
+      tft.setTextSize(2);
+      tft.setCursor(10, 297);
+      tft.print("No Echo");
     }
 
     // Draw timing scale (right side)

@@ -16,7 +16,7 @@ MCUFRIEND_kbv tft;
 // ----------------- Constants for Thickness Calculation -----------------
 #define SPEED_OF_SOUND_MM_PER_US 6.224    // 6061 Aluminum speed of sound in mm/us
 #define ECHO_THRESHOLD 2000              // ADC threshold to detect echo
-#define SAMPLE_PERIOD_US 0.2               // Approximate ADC sample period in microseconds
+#define SAMPLE_PERIOD_US 0.2              // Approximate ADC sample period in microseconds
 
 // ----------------- Globals -----------------
 unsigned int values[600];
@@ -64,12 +64,14 @@ void loop() {
       values[i] = ADC->ADC_CDR[0];
     }
 
-    // --- Print ADC values to Serial Monitor for debugging ---
+    // --- Print ADC values with sample numbers for Serial Plotter ---
     Serial.print("Scan ");
     Serial.print(j);
     Serial.println(" ADC values:");
     for (i = 0; i < numSamples; i++) {
-      Serial.println(values[i]);
+      Serial.print(i);       // sample number
+      Serial.print(" ");
+      Serial.println(values[i]); // ADC value
     }
     Serial.println("-----");
 
