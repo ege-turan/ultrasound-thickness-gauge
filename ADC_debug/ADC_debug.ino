@@ -17,6 +17,7 @@ MCUFRIEND_kbv tft;
 #define SPEED_OF_SOUND_MM_PER_US 6.224    // 6061 Aluminum speed of sound in mm/us
 #define ECHO_THRESHOLD 2000              // ADC threshold to detect echo
 #define SAMPLE_PERIOD_US 0.2              // Approximate ADC sample period in microseconds
+#define CONSTANT_DELAY_US 6.93   // extra delay to subtract
 
 // ----------------- Globals -----------------
 unsigned int values[600];
@@ -87,7 +88,12 @@ void loop() {
     // Calculate and print thickness if echo detected
     if (echoIndex >= 0) {
       unsigned long echoTime = echoIndex * SAMPLE_PERIOD_US;
-      float thickness_mm = (echoTime * SPEED_OF_SOUND_MM_PER_US) / 2.0;
+
+      // Apply delay correction
+      float correctedTime = echoTime - CONSTANT_DELAY_US;
+      if (correctedTime < 0) correctedTime = 0; // prevent negative
+
+      float thickness_mm = (correctedTime * SPEED_OF_SOUND_MM_PER_US) / 2.0;
 
       Serial.print("Scan ");
       Serial.print(j);
@@ -95,6 +101,8 @@ void loop() {
       Serial.print(echoIndex);
       Serial.print(", time = ");
       Serial.print(echoTime);
+      Serial.print(" us, corrected = ");
+      Serial.print(correctedTime);
       Serial.print(" us, thickness = ");
       Serial.print(thickness_mm, 2);
       Serial.println(" mm");
