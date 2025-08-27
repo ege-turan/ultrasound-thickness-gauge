@@ -34,7 +34,8 @@ MaterialCal materials[] = {
 int currentMaterial = 0; // index into materials[]
 
 // ----------------- Globals -----------------
-unsigned int values[MAX_SAMPLES];
+unsigned int values[MAX_SAMPLES] = {0};
+unsigned int corrected[MAX_SAMPLES] = {0};
 unsigned int reference[MAX_SAMPLES] = {0};
 bool referenceSet = false;
 
@@ -85,7 +86,7 @@ void loop() {
 
     // -------- Acquire samples --------
     for (int i = 0; i < MAX_SAMPLES; i++) {
-      while ((ADC->ADC_ISR & 0x03) == 0); // Wait ADC ready
+      while ((ADC->ADC_ISR & 0x03) == 0);
       values[i] = ADC->ADC_CDR[0];
     }
 
@@ -93,38 +94,19 @@ void loop() {
     if (digitalRead(pin_input_reference) == LOW) {
       for (int i = 0; i < MAX_SAMPLES; i++) reference[i] = values[i];
       referenceSet = true;
-      Serial.println("Reference (no object) captured.");
+      Serial.println("Reference captured.");
     }
 
     // -------- Reference subtraction --------
     if (referenceSet) {
       for (int i = 0; i < MAX_SAMPLES; i++) {
-        int corrected = (int)values[i] - (int)reference[i];
-        if (corrected < 0) corrected = 0;
-        values[i] = corrected;
+        int correct = (int)values[i] - (int)reference[i];
+        if (correct < 0) correct = 0;
+        corrected[i] = correct;
       }
     }
 
-    // -------- Debug: Serial print raw, ref, corrected --------
-    if (DEBUG_MODE) {
-      Serial.print("Scan ");
-      Serial.print(j);
-      Serial.println(" Samples Table:");
-      Serial.println("Idx\tRaw\tRef\tCorrected");
-      for (int i = 0; i < MAX_SAMPLES; i++) {
-        int rawVal = values[i];
-        int refVal = referenceSet ? reference[i] : 0;
-        int corrected = rawVal - refVal;
-        if (corrected < 0) corrected = 0;
-        Serial.print(i); Serial.print("\t");
-        Serial.print(rawVal); Serial.print("\t");
-        Serial.print(referenceSet ? refVal : -1); Serial.print("\t");
-        Serial.println(corrected);
-      }
-      Serial.println("-----");
-    }
-
-    // -------- Echo detection (first upward spike) --------
+    // -------- Echo detection --------
     int echoIndex = -1;
     for (int i = MIN_ECHO_SAMPLE; i < MAX_SAMPLES; i++) {
       int delta = values[i] - values[i - 1];
@@ -140,88 +122,56 @@ void loop() {
       MaterialCal cal = materials[currentMaterial];
       thickness_mm = cal.slope * echoIndex + cal.intercept;
       if (thickness_mm < 0) thickness_mm = 0;
-
-      Serial.print("Scan ");
-      Serial.print(j);
-      Serial.print(": Echo at sample ");
-      Serial.print(echoIndex);
-      Serial.print(", thickness = ");
-      Serial.print(thickness_mm, 2);
-      Serial.print(" mm (");
-      Serial.print(cal.name);
-      Serial.println(")");
-    } else {
-      Serial.print("Scan ");
-      Serial.print(j);
-      Serial.println(": No echo detected.");
     }
 
     // -------- Running average --------
     thicknessBuffer[bufferIndex] = thickness_mm;
     bufferIndex = (bufferIndex + 1) % RUNNING_AVG_LEN;
     if (numFilled < RUNNING_AVG_LEN) numFilled++;
-
     float runningAvg = 0;
     for (int i = 0; i < numFilled; i++) runningAvg += thicknessBuffer[i];
     runningAvg /= numFilled;
 
-    // -------- Display results --------
+    // -------- Display --------
     tft.setTextColor(WHITE, BLACK);
     tft.setTextSize(2);
-
     tft.setCursor(50, 200);
-    tft.print("Echo S: ");
-    tft.print(echoIndex);
-
+    tft.print("Echo S: "); tft.print(echoIndex);
     tft.setCursor(50, 225);
-    tft.print("T: ");
-    tft.print(thickness_mm, 2);
-    tft.print(" mm");
-
+    tft.print("T: "); tft.print(thickness_mm, 2); tft.print(" mm");
     tft.setCursor(200, 250);
-    tft.print("Avg: ");
-    tft.print(runningAvg, 2);
-    tft.print(" mm");
-
-    // -------- Timing scale (right side) --------
-    tft.setTextSize(1);
-    int scaleHeight = 2; // pixels per sample
-    tft.drawLine(440, 15, 440, 15 + MAX_SAMPLES * scaleHeight, WHITE);
-    for (int i = 0; i <= MAX_SAMPLES; i += 10) {
-      int y = 15 + i * scaleHeight;
-      tft.drawLine(440, y, 445, y, WHITE);
-      tft.setCursor(450, y - 5);
-      tft.print(i);
-    }
+    tft.print("Avg: "); tft.print(runningAvg, 2); tft.print(" mm");
 
     // -------- Grayscale scan column --------
+    int scaleHeight = 2;
     for (int i = 0; i < MAX_SAMPLES; i++) {
       uint8_t gray = map(values[i], 0, 4095, 0, 255);
       uint16_t color = tft.color565(gray, gray, gray);
       tft.fillRect(j * 24, 15 + i * scaleHeight, 23, scaleHeight, color);
     }
 
-    // -------- CSV Logging when sleep switch flipped --------
-    bool currSleepState = digitalRead(pin_input_sleep);
-    if (!lastSleepState && currSleepState == HIGH) {
-      Serial.println();
-      Serial.println("=== Sleep Detected — Dumping CSV ===");
-      Serial.println("Idx,Raw,Ref,Corrected");
+    // -------- Serial CSV logging --------
+    if (digitalRead(pin_input_reference) == HIGH) {
+      Serial.println("Idx,Raw,Ref,Corrected,EchoIdx,Thickness_mm");
       for (int i = 0; i < MAX_SAMPLES; i++) {
         int rawVal = values[i];
-        int refVal = referenceSet ? reference[i] : -1;
-        int corrected = rawVal - (referenceSet ? reference[i] : 0);
-        if (corrected < 0) corrected = 0;
+        int refVal = referenceSet ? reference[i] : 0;
+        int correct = corrected[i];
         Serial.print(i); Serial.print(",");
         Serial.print(rawVal); Serial.print(",");
         Serial.print(refVal); Serial.print(",");
-        Serial.println(corrected);
+        Serial.print(correct); Serial.print(",");
+        Serial.print(echoIndex); Serial.print(",");
+        Serial.println(thickness_mm, 2);
       }
-      Serial.println("=== End CSV ===");
-      while (digitalRead(pin_input_sleep) == HIGH) delay(50); // wait until switch released
+      Serial.println("-----"); // end of scan block
     }
-    lastSleepState = currSleepState;
 
-    delay(1000); // Wait before next scan
+    // -------- Sleep mode --------
+    if (digitalRead(pin_input_sleep) == HIGH) {
+      while (digitalRead(pin_input_sleep) == HIGH) { }
+    }
+
+    delay(1000);
   }
 }
