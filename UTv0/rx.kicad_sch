@@ -2735,7 +2735,7 @@
 		)
 		(uuid "d8890eee-463e-4c26-b2d7-78211dea2314")
 	)
-	(global_label "-9V"
+	(global_label "-10V"
 		(shape passive)
 		(at 273.05 127 0)
 		(fields_autoplaced yes)
@@ -2747,7 +2747,7 @@
 		)
 		(uuid "0342967c-c63e-42cf-96cc-d732ee1cb458")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 278.7944 127 0)
+			(at 280.0039 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2757,7 +2757,7 @@
 			)
 		)
 	)
-	(global_label "+9V"
+	(global_label "+10V"
 		(shape passive)
 		(at 274.32 50.8 0)
 		(fields_autoplaced yes)
@@ -2769,7 +2769,7 @@
 		)
 		(uuid "c5c218a9-f8c8-4496-9398-b03ac3845092")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 280.0644 50.8 0)
+			(at 281.2739 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
