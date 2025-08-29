@@ -16,7 +16,7 @@ MCUFRIEND_kbv tft;
 #define pin_input_sleep 31
 
 // ----------------- Constants -----------------
-#define MAX_SAMPLES       50     // Samples per scan
+#define MAX_SAMPLES       25     // Samples per scan
 #define RUNNING_AVG_LEN   5       // Number of scans for averaging
 #define MIN_ECHO_SAMPLE   16      // Ignore first few samples (ringing)
 
@@ -135,9 +135,9 @@ void loop() {
     int echoIndex = -1;
     for (int i = MIN_ECHO_SAMPLE; i < MAX_SAMPLES; i++) {
       int delta = values[i] - values[i - 1];
-      if (delta > 700) { // delta > 0) { // upward slope
+      if (delta > 0) { // delta > 0) { // upward slope
         echoIndex = i;
-        break;
+        // break;
       }
     }
 

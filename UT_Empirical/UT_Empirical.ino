@@ -69,7 +69,7 @@ void loop() {
     int echoIndex = -1;
     for (int i = MIN_ECHO_SAMPLE; i < MAX_SAMPLES; i++) {
       int delta = values[i] - values[i - 1];
-      if (delta > 0) { // upward slope
+      if (delta > 1000) { // upward slope
         echoIndex = i;
         break;
       }
